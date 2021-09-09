@@ -1,0 +1,29 @@
+#!/usr/bin/python3
+import sys,os
+import rospy
+from geometry_msgs.msg import PoseArray, Pose
+
+fpath = sys.argv[1]
+#fname, fext = os.path.splitext(fpath)
+
+if __name__ == "__main__":
+    rospy.init_node('poses_publisher_node')
+    pa_pub = rospy.Publisher('poses', PoseArray, queue_size=1)
+    pa = PoseArray()
+    pa.header.frame_id='map'
+    with open(fpath) as poses:
+        for pose in poses:
+            x,y = [float(v.strip()) for v in pose.split(',')]
+            p = Pose()
+            p.position.x = x
+            p.position.y = y
+            p.position.z = 0
+            p.orientation.x = 0
+            p.orientation.y = 0
+            p.orientation.z = 0
+            p.orientation.w = 1
+            pa.poses.append( p )
+    r = rospy.Rate(10)
+    while not rospy.is_shutdown():
+        pa_pub.publish(pa)
+        r.sleep()        

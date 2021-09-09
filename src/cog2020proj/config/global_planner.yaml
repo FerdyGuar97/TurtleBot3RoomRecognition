@@ -1,0 +1,15 @@
+global_costmap:
+  origin_y: -10
+  origin_x: -10
+  width: 20
+  height: 20
+  robot_radius: 0.20
+
+  plugins:
+  - {name: "static_map", type: "costmap_2d::StaticLayer"}
+  - {name: "inflated_map", type: "costmap_2d::InflationLayer"}
+
+  inflated_map:
+    inflation_radius: 0.20
+  
+

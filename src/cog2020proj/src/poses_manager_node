@@ -1,0 +1,127 @@
+#!/usr/bin/env python3
+import rospy
+from geometry_msgs.msg import PoseArray, Pose, PoseStamped
+from std_msgs.msg import Bool, String, Int16
+from move_base_msgs.msg import MoveBaseActionResult
+from util import euler_to_quaternion
+
+rospy.init_node("poses_manager_node")
+
+pg = rospy.Publisher("/move_base_simple/goal", PoseStamped, queue_size=1, latch=True)   
+pa = rospy.Publisher("/positionACK", Bool, queue_size=0)
+per = rospy.Publisher("/end_rotation", Bool, queue_size=0)
+pdn = rospy.Publisher("/detection_number", Int16, queue_size=0)
+
+rate = rospy.Rate(0.1) 
+
+global index 
+index = 0
+global poses
+poses = []
+
+
+def rcv_poses(msg):
+    '''
+    rcv_poses é la callback chiamata all'arrivo di una posa sul topic /poses, 
+    salva il poseArray e fornisce il primo goal alla funzione pub_pose_stamped ed
+    il numero di detection da effettuare sul topic /num_detection
+    '''
+    global poses
+    sp.unregister()
+    poses = msg.poses
+    pdn.publish(len(poses)*6)
+    pub_pose_stamped(poses[index])
+
+global rotation
+rotation = False
+
+def rcv_ack(msg):
+    '''
+    rcv_ack é la callback chiamata al raggiungimento del goal da parte del robot,
+    Fa cominciare la routine di rotazione e detection
+    '''
+    if(rotation == False):
+        lookAround()
+
+def rcv_rotation_ack(msg):
+    '''
+    rcv_rotation_ack é la callback chiamta alla fine della routine di lookAround del robot,
+    fornisce il nuovo goal a pub_pose_stamped
+    '''
+    global index
+    global poses
+    global rotation
+    rospy.loginfo(msg)
+    if(msg.data==True):
+        rotation = False
+        if(index == len(poses)-1):
+            rospy.loginfo("Final destination reached")
+        else:
+            index += 1
+            pub_pose_stamped(poses[index])
+
+def lookAround():
+    '''
+    lookAround é la routine di rotazione e detection del robot
+    '''
+    global rotation
+    rotation = True
+    rate.sleep()
+    rate.sleep()
+    pub_pose_stamped_quaternion(poses[index], 1.05)
+    rate.sleep()
+    pa.publish(True)
+    pub_pose_stamped_quaternion(poses[index], 2.09)
+    rate.sleep()
+    pa.publish(True)
+    pub_pose_stamped_quaternion(poses[index], 3.14)
+    rate.sleep()
+    pa.publish(True)
+    pub_pose_stamped_quaternion(poses[index], 4.19)
+    rate.sleep()
+    pa.publish(True)
+    pub_pose_stamped_quaternion(poses[index], 5.24)
+    rate.sleep()
+    pa.publish(True)
+    pub_pose_stamped_quaternion(poses[index], 6.28)
+    rate.sleep()
+    pa.publish(True)
+    per.publish(True)    
+
+
+def pub_pose_stamped(pose):
+    '''
+    pub_pose_stamped pubblica la posizione del goal in formato pose_stamped sul topic /move_base_simple goal
+    '''
+    rospy.loginfo(pose)
+    pose_stamped = PoseStamped()
+    pose_stamped.pose = pose
+    pose_stamped.header.stamp = rospy.Time.now()
+    pose_stamped.header.frame_id = "map" 
+    pg.publish(pose_stamped)
+
+def pub_pose_stamped_quaternion(pose, rad):
+    '''
+    pub_pose_stamped_quaternion pubblica la posizione e l'orientamento del goal in formato pose_stamped sul topic /move_base_simple goal
+    '''
+    rospy.loginfo(pose)
+    q = euler_to_quaternion(rad, 0, 0)
+    pose_stamped = PoseStamped()
+    pose_stamped.pose = pose
+    pose_stamped.pose.orientation.x = q[0]
+    pose_stamped.pose.orientation.y = q[1]
+    pose_stamped.pose.orientation.z = q[2]
+    pose_stamped.pose.orientation.w = q[3]
+    pose_stamped.header.stamp = rospy.Time.now()
+    pose_stamped.header.frame_id = "map" 
+    pg.publish(pose_stamped)
+
+sp = rospy.Subscriber("/poses", PoseArray, rcv_poses)
+sr = rospy.Subscriber("/move_base/result", MoveBaseActionResult, rcv_ack)
+ser = rospy.Subscriber("/end_rotation", Bool, rcv_rotation_ack) 
+
+try:
+    rospy.spin()
+
+except KeyboardInterrupt:
+    print("Shutting down")

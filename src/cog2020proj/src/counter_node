@@ -1,0 +1,53 @@
+#!/usr/bin/env python3
+
+import rospy
+from vision_msgs.msg import Detection2D, Detection2DArray
+from std_msgs.msg import String, Bool, Int16
+import collections
+
+rospy.init_node('counter_node')
+
+accepted = ["person", "cat", "sofa", "potted plant", "clock", "sports ball"]
+
+global detected
+detected = []
+
+global detected_image
+detected_image = 0
+
+global detection_number
+detection_number = 0
+
+def rcv_detected(msg):
+    '''
+    rcv_detected é la callback che riceve i risultati della detection,
+    conta le occorrenze degli oggetti ricercati
+    '''
+    global detected_image
+    global detected
+    detected_image += 1
+    data = msg.data.split(',')
+    for obj in data:
+        if obj in accepted:
+            detected.append(obj)
+    if(detected_image==detection_number):
+        counter = collections.Counter(detected)
+        for obj, num in list(counter.items()):
+            rospy.loginfo("Object detected: " + str(num) + " " + obj)
+
+def rcv_detection_number(msg):
+    '''
+    rcv_detection_number riceve il numero di detection da aspettare prima di pubblicare il risultato finale
+    '''
+    global detection_number
+    detection_number = msg.data
+
+sd = rospy.Subscriber("detected", String, rcv_detected)
+sdn = rospy.Subscriber("detection_number", Int16, rcv_detection_number)
+
+try:
+    rospy.spin()                                                                  # Rilasciamo il lock
+
+except KeyboardInterrupt:
+    print("Shutting down")
+    

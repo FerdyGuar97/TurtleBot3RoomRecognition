@@ -1,0 +1,13 @@
+<launch>
+  <arg name="world" default="world1" />
+  <node name="gazebo" pkg="gazebo_ros" type="gzserver" args="$(find cog2020proj)/data/$(arg world).sdf" />
+  <node name="map_server" pkg="map_server" type="map_saver" args="-f $(find cog2020proj)/data/$(arg world)">
+    <remap from="/map" to="/map2d"/>
+  </node>
+  <!--
+      rosservice call /gazebo_2Dmap_plugin/generate_map
+      python3 src/cog2020proj/src/create_poses_file.py src/cog2020proj/data/world1.yaml
+  -->
+</launch>
+
+

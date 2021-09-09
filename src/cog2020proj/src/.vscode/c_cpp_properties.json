@@ -1,0 +1,19 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/home/mivia/cog20proj/devel/include/**",
+        "/opt/ros/melodic/include/**",
+        "/home/mivia/cog20proj/src/gazebo_ros_2Dmap_plugin/include/**",
+        "/home/mivia/cog20proj/src/vision_msgs/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS"
+    }
+  ],
+  "version": 4
+}

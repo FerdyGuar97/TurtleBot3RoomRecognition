@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+import os
+import rospy
+from sensor_msgs.msg import Image
+from std_msgs.msg import Bool
+import ros_numpy
+
+
+rospy.init_node('imagepublisher_node')                                                          
+pub = rospy.Publisher('image', Image, queue_size=2)                                             
+
+lastImage = None        
+
+def rcv_image(msg):
+    """
+    Callback dal topic /camera/rgb/image_raw dove 
+    acquisiamo un frame dalla camera
+    """
+    global lastImage
+    lastImage = msg
+
+def rcv_ack(msg):
+    """
+    Callback dal topic /positionACK dove, ricevuto l'ack dell'avvenuta rotazione del robot,
+    acquisisce un frame dalla camera e lo invia su /image
+    """
+    if(msg):
+        pub.publish(lastImage)
+        rospy.loginfo('positionACK')
+
+si = rospy.Subscriber("/camera/rgb/image_raw", Image, rcv_image)                                  
+sp = rospy.Subscriber("positionACK", Bool, rcv_ack)                                            
+
+try:
+    rospy.spin()
+
+except KeyboardInterrupt:
+    print("Shutting down")
+    

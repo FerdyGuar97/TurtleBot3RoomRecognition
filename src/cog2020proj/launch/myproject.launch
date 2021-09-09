@@ -1,0 +1,18 @@
+<launch>
+  <arg name="world" default="world1" />
+  <!-- init world -->
+  <node name="gazebo" pkg="gazebo_ros" type="gzserver" args="$(find cog2020proj)/data/$(arg world).sdf" />
+  <include file="$(find cog2020proj)/launch/spawn_turtle.launch" />
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find cog2020proj)/data/$(arg world).yaml" />
+  <node name="map_transform_publisher" pkg="tf2_ros" type="static_transform_publisher" args="0 0 0 0 0 0 odom map" />
+  <!-- init project and visualization -->
+  <node name="poses_publisher_node" pkg="cog2020proj" type="poses_publisher_node" args="$(find cog2020proj)/data/$(arg world).txt" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find cog2020proj)/rviz/cog20proj.rviz" />
+  <!-- init rosparam and the move_base node -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen"/>
+  <!-- init move_base param -->
+  <rosparam file="$(find cog2020proj)/config/common_costmap.yaml" command="load" ns="move_base" />
+  <rosparam file="$(find cog2020proj)/config/local_planner.yaml" command="load" ns="move_base"/>
+  <rosparam file="$(find cog2020proj)/config/global_planner.yaml" command="load" ns="move_base"/>
+  <rosparam file="$(find cog2020proj)/config/base_local_planner_params.yaml" command="load" ns="move_base"/>
+</launch>

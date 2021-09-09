@@ -1,0 +1,5 @@
+TrajectoryPlannerROS:
+  min_vel_x: 0.1
+  acc_lim_theta: 1
+  holonomic_robot: False
+  meter_scoring: true
