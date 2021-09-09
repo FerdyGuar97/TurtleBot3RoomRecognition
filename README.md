@@ -27,6 +27,10 @@ The included *myproject.launch* launches the framework, including
 * the pose publisher (that publisher the list of locations to be visited in the world)
 * a rviz file with some topics preloaded
 
+## Architecture
+
+![TurtleBot3RoomRecognition](https://user-images.githubusercontent.com/52747015/132722989-be84c332-18e7-45ba-bb9a-568216dd08fd.png)
+
 ## Setup
 
 Extract the gazebo_data archive in the home directory
