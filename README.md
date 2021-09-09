@@ -80,4 +80,4 @@ rosrun cog2020proj counter_node
 rosrun cog2020proj poses_manager_node 
 ~~~
 
-In order to re-execute the demostration you just need to run the poses_manager_node again. # TurtleBot3RoomRecognition
+In order to re-execute the demostration you just need to run the poses_manager_node again.
